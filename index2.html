@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кіно</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="block block-1">
+        <h1>Афіша</h1>
+        <a href="index.html" class="btn">← Назад</a>
+    </div>
+
+    <div class="block block-2">
+        <h3>Інфо</h3>
+        <p>Перегляд актуальних фільмів у прокаті. Натисніть на назву, щоб прочитати опис.</p>
+    </div>
+
+    <div class="block block-3">
+        <h3>Меню</h3>
+        <ul>
+            <li><a href="index.html">Головна</a></li>
+            <li><a href="index2.html">Переглянути</a></li>
+        </ul>
+    </div>
+
+    <div class="block block-4">
+        <h3>Сьогодні у кіно</h3>
+        <div id="result-container" class="collapse-container"></div>
+    </div>
+
+    <div class="block block-5">
+        <h3>Інструкція</h3>
+        <p>Клікніть на назву фільму, щоб розгорнути деталі.</p>
+    </div>
+
+    <div class="block block-6"><h2>Promo</h2></div>
+
+    <div class="block block-7">
+        <h3>© 2025</h3>
+        <span>Аутпут</span>
+    </div>
+</div>
+
+<script>
+    const container = document.getElementById('result-container');
+    const storedData = localStorage.getItem('cinemaData');
+
+    if (storedData) {
+        const data = JSON.parse(storedData);
+        
+        data.forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'collapse-item';
+            
+            itemDiv.innerHTML = `
+                <button class="collapse-btn">${escapeHtml(item.title)}</button>
+                <div class="collapse-content">
+                    <div class="collapse-inner">
+                        ${escapeHtml(item.content).replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            `;
+            container.appendChild(itemDiv);
+        });
+        
+        initCollapse();
+    } else {
+        container.innerHTML = '<p>Афіша пуста. <a href="index.html">Додати фільми</a></p>';
+    }
+
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function initCollapse() {
+        var coll = document.getElementsByClassName("collapse-btn");
+        for (var i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.maxHeight){
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                } 
+            });
+        }
+    }
+</script>
+
+</body>
+</html>
