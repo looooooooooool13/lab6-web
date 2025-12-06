@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кіно</title>
+    <title>Кіно - Адмінка</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,49 +16,41 @@
 
     <div class="block block-2">
         <h3>Інфо</h3>
-        <p>Вітаємо в адмін-панелі кінотеатру. Тут ви можете додати нові фільми до афіші, вказавши назву та опис сюжету.</p>
+        <p>Введіть дані та натисніть Зберегти.</p>
     </div>
 
     <div class="block block-3">
         <h3>Меню</h3>
         <ul>
-            <li><a href="index.html">Головна</a></li>
-            <li><a href="index2.html">Переглянути</a></li>
+            <li><a href="index.html">Додати фільм</a></li>
+            <li><a href="index2.html">Переглянути афішу</a></li>
         </ul>
     </div>
 
     <div class="block block-4">
         <h3>Редактор афіші</h3>
         
-        <form id="labForm">
+        <form action="server.php" method="POST">
             <div id="editor-container">
                 <div class="editor-item">
-                    <input type="text" class="input-title" placeholder="Назва фільму" required>
-                    <textarea class="input-content" placeholder="Опис сюжету / Сеанси" rows="3" required></textarea>
+                    <input type="text" name="titles[]" class="input-title" placeholder="Назва фільму" required>
+                    <textarea name="contents[]" class="input-content" placeholder="Опис" rows="3" required></textarea>
                 </div>
             </div>
 
             <div class="editor-controls">
-                <button type="button" class="btn" onclick="addBlock()">+ Додати ще фільм</button>
+                <button type="button" class="btn" onclick="addBlock()">+ Додати ще</button>
             </div>
 
-            <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">Зберегти та переглянути</button>
+            <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">Зберегти</button>
         </form>
     </div>
 
     <div class="block block-5">
         <h3>Extra</h3>
-        <p>Реклама попкорну та напоїв.</p>
     </div>
-
-    <div class="block block-6">
-        <h2>Promo</h2>
-    </div>
-
-    <div class="block block-7">
-        <h3>© 2025</h3>
-        <span>Введення</span>
-    </div>
+    <div class="block block-6"><h2>Promo</h2></div>
+    <div class="block block-7"><h3>2025</h3></div>
 </div>
 
 <script>
@@ -67,31 +59,12 @@
         const div = document.createElement('div');
         div.className = 'editor-item';
         div.innerHTML = `
-            <input type="text" class="input-title" placeholder="Назва фільму" required>
-            <textarea class="input-content" placeholder="Опис сюжету / Сеанси" rows="3" required></textarea>
+            <input type="text" name="titles[]" class="input-title" placeholder="Назва фільму" required>
+            <textarea name="contents[]" class="input-content" placeholder="Опис" rows="3" required></textarea>
             <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">Видалити</button>
         `;
         container.appendChild(div);
     }
-
-    document.getElementById('labForm').addEventListener('submit', function(e) {
-        e.preventDefault(); 
-
-        const titles = document.querySelectorAll('.input-title');
-        const contents = document.querySelectorAll('.input-content');
-        const data = [];
-
-        titles.forEach((title, index) => {
-            data.push({
-                title: title.value,
-                content: contents[index].value
-            });
-        });
-
-        localStorage.setItem('cinemaData', JSON.stringify(data));
-
-        window.location.href = 'index2.html';
-    });
 </script>
 
 </body>
