@@ -72,7 +72,6 @@ function saveData() {
     const titles = [...document.querySelectorAll('.input-title')].map(i => i.value.trim());
     const contents = [...document.querySelectorAll('.input-content')].map(i => i.value.trim());
 
-    // Формуємо масив об’єктів тільки з непорожніми заголовками
     const objects = titles.map((title, i) => ({
         title: title,
         content: contents[i] ?? ""
@@ -93,7 +92,6 @@ function saveData() {
         if (r.status === "ok") {
             alert("Успішно збережено!");
 
-            // 🔥 Очищаємо та залишаємо один порожній блок
             document.getElementById('editor-container').innerHTML = `
                 <div class="editor-item">
                     <input type="text" class="input-title" placeholder="Назва фільму">
