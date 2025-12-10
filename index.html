@@ -16,7 +16,9 @@
 
     <div class="block block-2">
         <h3>Інфо</h3>
-        <p>Введіть дані та натисніть Зберегти.</p>
+        <p>
+            Введіть дані про фільми та натисніть <b>«Зберегти»</b>.<br>
+        </p>
     </div>
 
     <div class="block block-3">
@@ -29,42 +31,84 @@
 
     <div class="block block-4">
         <h3>Редактор афіші</h3>
-        
-        <form action="server.php" method="POST">
-            <div id="editor-container">
-                <div class="editor-item">
-                    <input type="text" name="titles[]" class="input-title" placeholder="Назва фільму" required>
-                    <textarea name="contents[]" class="input-content" placeholder="Опис" rows="3" required></textarea>
-                </div>
-            </div>
 
-            <div class="editor-controls">
-                <button type="button" class="btn" onclick="addBlock()">+ Додати ще</button>
+        <div id="editor-container">
+            <div class="editor-item">
+                <input type="text" class="input-title" placeholder="Назва фільму">
+                <textarea class="input-content" placeholder="Опис" rows="3"></textarea>
             </div>
+        </div>
 
-            <button type="submit" class="btn" style="width: 100%; margin-top: 10px;">Зберегти</button>
-        </form>
+        <div class="editor-controls">
+            <button type="button" class="btn" onclick="addBlock()">+ Додати ще</button>
+        </div>
+
+        <button type="button" class="btn" style="width: 100%;" onclick="saveData()">Зберегти</button>
     </div>
 
     <div class="block block-5">
         <h3>Extra</h3>
+        <p>Тут можна вивести додаткову інформацію про систему, підказки тощо.</p>
     </div>
+
     <div class="block block-6"><h2>Promo</h2></div>
     <div class="block block-7"><h3>2025</h3></div>
 </div>
 
 <script>
-    function addBlock() {
-        const container = document.getElementById('editor-container');
-        const div = document.createElement('div');
-        div.className = 'editor-item';
-        div.innerHTML = `
-            <input type="text" name="titles[]" class="input-title" placeholder="Назва фільму" required>
-            <textarea name="contents[]" class="input-content" placeholder="Опис" rows="3" required></textarea>
-            <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">Видалити</button>
-        `;
-        container.appendChild(div);
+function addBlock() {
+    const container = document.getElementById('editor-container');
+    const div = document.createElement('div');
+    div.className = 'editor-item';
+    div.innerHTML = `
+        <input type="text" class="input-title" placeholder="Назва фільму">
+        <textarea class="input-content" placeholder="Опис" rows="3"></textarea>
+        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()">Видалити</button>
+    `;
+    container.appendChild(div);
+}
+
+function saveData() {
+    const titles = [...document.querySelectorAll('.input-title')].map(i => i.value.trim());
+    const contents = [...document.querySelectorAll('.input-content')].map(i => i.value.trim());
+
+    // Формуємо масив об’єктів тільки з непорожніми заголовками
+    const objects = titles.map((title, i) => ({
+        title: title,
+        content: contents[i] ?? ""
+    })).filter(x => x.title.length > 0 || x.content.length > 0);
+
+    if (objects.length === 0) {
+        alert("Немає даних для збереження.");
+        return;
     }
+
+    fetch("server.php", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(objects)
+    })
+    .then(r => r.json())
+    .then(r => {
+        if (r.status === "ok") {
+            alert("Успішно збережено!");
+
+            // 🔥 Очищаємо та залишаємо один порожній блок
+            document.getElementById('editor-container').innerHTML = `
+                <div class="editor-item">
+                    <input type="text" class="input-title" placeholder="Назва фільму">
+                    <textarea class="input-content" placeholder="Опис" rows="3"></textarea>
+                </div>
+            `;
+        } else {
+            alert("Помилка збереження: " + (r.msg || ""));
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Сталася помилка при відправці даних.");
+    });
+}
 </script>
 
 </body>
