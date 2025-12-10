@@ -1,30 +1,23 @@
 <?php
-$dbFile = 'movies.json';
-$movies = [];
+$filename = "movies.json";
 
-if (file_exists($dbFile)) {
-    $jsonContent = file_get_contents($dbFile);
-    $movies = json_decode($jsonContent, true) ?? [];
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['clear'])) {
-        file_put_contents($dbFile, json_encode([]));
-    } 
-    elseif (!empty($_POST['titles'])) {
-        $titles = $_POST['titles'];
-        $contents = $_POST['contents'];
-        
-        for ($i = 0; $i < count($titles); $i++) {
-            array_unshift($movies, [
-                'title' => htmlspecialchars($titles[$i]),
-                'content' => htmlspecialchars($contents[$i])
-            ]);
-        }
-        file_put_contents($dbFile, json_encode($movies, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    }
-
+if (isset($_POST["clear"])) {
+    file_put_contents($filename, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     header("Location: index2.html");
     exit;
 }
-?>
+
+header("Content-Type: application/json; charset=utf-8");
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+
+$raw = file_get_contents("php://input");
+$data = json_decode($raw, true);
+
+if (!is_array($data)) {
+    echo json_encode(["status" => "error", "msg" => "No data received"]);
+    exit;
+}
+
+file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+echo json_encode(["status" => "ok"]);
