@@ -16,7 +16,9 @@
 
     <div class="block block-2">
         <h3>Інфо</h3>
-        <p>Тут показано всі додані сеанси.</p>
+        <p>
+            Тут показано всі додані сеанси у вигляді <b>Collapse</b>.<br>
+        </p>
     </div>
 
     <div class="block block-3">
@@ -34,6 +36,7 @@
 
     <div class="block block-5">
         <h3>Управління</h3>
+        <!-- Очистка списку через синхронний POST з редіректом назад -->
         <form action="server.php" method="POST">
             <input type="hidden" name="clear" value="1">
             <button type="submit" class="btn btn-danger" style="width: 100%;">Очистити список</button>
@@ -45,53 +48,70 @@
 </div>
 
 <script>
-    fetch('movies.json')
+function loadMovies() {
+    // Math.random() + cache: 'no-store' — проти кешу InfinityFree
+    fetch("movies.json?rand=" + Math.random(), { cache: "no-store" })
         .then(response => {
-            if (!response.ok) throw new Error('No file');
+            if (!response.ok) {
+                throw new Error("Не вдалося завантажити movies.json");
+            }
             return response.json();
         })
-        .then(data => {
-            const container = document.getElementById('movies-container');
-            
-            if (!data || data.length === 0) {
-                container.innerHTML = '<p>Афіша пуста.</p>';
-                return;
-            }
-
-            data.forEach(movie => {
-                const item = document.createElement('div');
-                item.className = 'collapse-item';
-                const safeContent = movie.content.replace(/\n/g, '<br>');
-
-                item.innerHTML = `
-                    <button class="collapse-btn">${movie.title}</button>
-                    <div class="collapse-content">
-                        <div class="collapse-inner">${safeContent}</div>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-
-            addCollapseListeners();
-        })
+        .then(showMovies)
         .catch(error => {
-            document.getElementById('movies-container').innerHTML = '<p>Афіша пуста.</p>';
+            console.error(error);
+            document.getElementById("movies-container").innerHTML = "<p>Афіша пуста або файл відсутній.</p>";
         });
+}
 
-    function addCollapseListeners() {
-        var coll = document.getElementsByClassName("collapse-btn");
-        for (var i = 0; i < coll.length; i++) {
-            coll[i].addEventListener("click", function() {
-                this.classList.toggle("active");
-                var content = this.nextElementSibling;
-                if (content.style.maxHeight){
-                    content.style.maxHeight = null;
-                } else {
-                    content.style.maxHeight = content.scrollHeight + "px";
-                } 
-            });
-        }
+function showMovies(data) {
+    const container = document.getElementById("movies-container");
+    container.innerHTML = "";
+
+    if (!Array.isArray(data) || data.length === 0) {
+        container.innerHTML = "<p>Афіша пуста.</p>";
+        return;
     }
+
+    data.forEach(movie => {
+        const item = document.createElement("div");
+        item.className = "collapse-item";
+
+        const safeTitle = movie.title || "Без назви";
+        const safeContent = (movie.content || "").replace(/\n/g, "<br>");
+
+        item.innerHTML = `
+            <button class="collapse-btn">${safeTitle}</button>
+            <div class="collapse-content">
+                <div class="collapse-inner">${safeContent}</div>
+            </div>
+        `;
+
+        container.appendChild(item);
+    });
+
+    addCollapseListeners();
+}
+
+function addCollapseListeners() {
+    const buttons = document.getElementsByClassName("collapse-btn");
+    for (let i = 0; i < buttons.length; i++) {
+        buttons[i].onclick = function() {
+            this.classList.toggle("active");
+            const content = this.nextElementSibling;
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+            }
+        };
+    }
+}
+
+// Початкове завантаження
+loadMovies();
+// Періодичне асинхронне оновлення кожні 5 секунд
+setInterval(loadMovies, 5000);
 </script>
 
 </body>
